@@ -367,6 +367,27 @@ const httpServer = createServer(
       return;
     }
 
+    // Serve static assets (CSS, JS)
+    if (req.method === "GET" && url.pathname.match(/\.(css|js|html)$/)) {
+      const fileName = path.basename(url.pathname);
+      const filePath = path.join(ASSETS_DIR, fileName);
+      
+      if (fs.existsSync(filePath)) {
+        const contentType = url.pathname.endsWith('.css') 
+          ? 'text/css' 
+          : url.pathname.endsWith('.js') 
+            ? 'application/javascript' 
+            : 'text/html';
+        
+        res.writeHead(200, {
+          'Content-Type': contentType,
+          'Access-Control-Allow-Origin': '*',
+        });
+        fs.createReadStream(filePath).pipe(res);
+        return;
+      }
+    }
+
     res.writeHead(404).end("Not Found");
   }
 );
